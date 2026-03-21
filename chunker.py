@@ -1,4 +1,4 @@
-def split_into_chunks(text, chunk_size=500, overlap=50):
+def split_into_chunks(text, chunk_size=500, overlap=200):
     """
     Split text into chunks of roughly chunk_size characters.
     overlap means each chunk shares 50 characters with the next

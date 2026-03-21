@@ -34,7 +34,7 @@ from chunker import split_into_chunks
 pdf_text = read_pdf("consumer_rights.pdf")
 chunks = split_into_chunks(pdf_text)
 
-question = "What are my rights under HIPAA?"
+question = "Can I see my medical records?"
 relevant = find_relevant_chunks(question, chunks)
 
 print(f"Question: {question}")

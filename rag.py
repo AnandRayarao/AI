@@ -3,7 +3,8 @@ import os
 from dotenv import load_dotenv
 from pdf_reader import read_pdf
 from chunker import split_into_chunks
-from retriever import find_relevant_chunks
+from embedder import get_embeddings, find_similar_chunks
+
 
 load_dotenv()
 
@@ -11,14 +12,15 @@ client = anthropic.Anthropic(
     api_key=os.getenv("ANTHROPIC_API_KEY")
 )
 
-def ask_document(question, chunks):
+def ask_document(question, chunks, embeddings):
     """
     Find relevant chunks and ask Claude to answer
     based only on those chunks.
     """
     
     # Step 1 - find relevant chunks
-    relevant_chunks = find_relevant_chunks(question, chunks)
+    relevant_chunks = find_similar_chunks(question, chunks, embeddings)
+
     
     # Step 2 - join chunks into one context block
     context = "\n\n".join(relevant_chunks)
@@ -49,20 +51,20 @@ ANSWER:"""
 
 
 def main():
-    # Load and chunk the PDF once at startup
     print("Loading document...")
-    pdf_text = read_pdf("consumer_rights.pdf")
+    pdf_text = read_pdf("AnandResume.pdf")
     chunks = split_into_chunks(pdf_text)
-    print(f"Document ready. {len(chunks)} chunks loaded.")
+    embeddings = get_embeddings(chunks)  # add this line
+    print(f"Ready. {len(chunks)} chunks loaded.")
     print("-" * 40)
     print("Ask questions about your HIPAA document.")
     print("Type 'quit' to exit.")
-    
+
     while True:
         question = input("\nYou: ")
         if question.lower() == "quit":
             break
-        answer = ask_document(question, chunks)
+        answer = ask_document(question, chunks, embeddings)  # add embeddings here
         print(f"\nClaude: {answer}")
 
 
