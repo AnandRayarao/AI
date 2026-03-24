@@ -6,7 +6,38 @@
     <title>Healthcare AI Assistant</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        
+        .upload-section {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 1px solid #e0e0e0;
+}
+
+.upload-section h3 {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 12px;
+    color: #1a1a1a;
+}
+
+.upload-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+#upload-status {
+    margin-top: 10px;
+    font-size: 13px;
+    color: #0066cc;
+}
+
+#doc-list {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #666;
+}
         body {
             font-family: -apple-system, sans-serif;
             background: #f5f5f5;
@@ -113,6 +144,15 @@
     <div class="container">
         <h1>Healthcare AI Assistant</h1>
         <p class="subtitle">Ask questions about your healthcare documents</p>
+        <div class="upload-section">
+    <h3>Upload a document</h3>
+    <div class="upload-row">
+        <input type="file" id="file-input" accept=".pdf"/>
+        <button onclick="uploadFile()">Upload PDF</button>
+    </div>
+    <div id="upload-status"></div>
+    <div id="doc-list"></div>
+</div>
         
         <div class="chat-box" id="chat-box">
             <div class="message claude">
@@ -182,6 +222,50 @@
             btn.disabled = false;
             chatBox.scrollTop = chatBox.scrollHeight;
         }
+        async function uploadFile() {
+    const fileInput = document.getElementById('file-input');
+    const status = document.getElementById('upload-status');
+    
+    if (!fileInput.files[0]) {
+        status.textContent = 'Please select a PDF file first.';
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('file', fileInput.files[0]);
+    
+    status.textContent = 'Uploading and processing...';
+    
+    try {
+        const response = await fetch('/upload', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.error) {
+            status.textContent = 'Error: ' + data.error;
+        } else {
+            status.textContent = data.message + ' (' + data.chunks + ' chunks loaded)';
+            loadDocuments();
+        }
+    } catch (error) {
+        status.textContent = 'Upload failed. Please try again.';
+    }
+}
+
+async function loadDocuments() {
+    const response = await fetch('/documents');
+    const data = await response.json();
+    const docList = document.getElementById('doc-list');
+    if (data.documents.length > 0) {
+        docList.textContent = 'Loaded: ' + data.documents.join(', ');
+    }
+}
+
+// Load documents list on page load
+loadDocuments();
     </script>
 </body>
 </html>

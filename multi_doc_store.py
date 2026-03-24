@@ -70,7 +70,26 @@ def search_all(question, top_n=3):
         })
 
     return chunks_with_source
-
+def add_single_document(filename, chunks):
+    """Add a single document to vector database"""
+    collection = get_collection()
+    
+    # Check if already loaded
+    existing = collection.get(where={"source": filename})
+    if len(existing['ids']) > 0:
+        print(f"{filename} already in database")
+        return
+    
+    print(f"Adding {filename} to database...")
+    embeddings = model.encode(chunks).tolist()
+    
+    collection.add(
+        documents=chunks,
+        embeddings=embeddings,
+        ids=[f"{filename}_chunk_{i}" for i in range(len(chunks))],
+        metadatas=[{"source": filename} for _ in chunks]
+    )
+    print(f"Added {len(chunks)} chunks from {filename}")
 
 # Test it
 load_all_documents()
