@@ -4,6 +4,8 @@ from dotenv import load_dotenv
 from pdf_reader import read_pdf
 from chunker import split_into_chunks
 from vector_store import add_documents, search
+from multi_doc_store import load_all_documents, search_all
+
 
 
 load_dotenv()
@@ -13,10 +15,13 @@ client = anthropic.Anthropic(
 )
 
 def ask_document(question):
-    # Search vector database
-    relevant_chunks = search(question)
-    context = "\n\n".join(relevant_chunks)
+   
+    results = search_all(question)
     
+    # Build context with sources
+    context = ""
+    for r in results:
+        context += f"From {r['source']}:\n{r['text']}\n\n"
     prompt = f"""You are a helpful healthcare assistant.
 Answer the question based ONLY on the context below.
 If the answer is not in the context say 'I could not find that in the document.'
@@ -38,14 +43,9 @@ ANSWER:"""
 
 
 def main():
-    print("Loading document...")
-    pdf_text = read_pdf("consumer_rights.pdf")
-    chunks = split_into_chunks(pdf_text)
-    
-    # Add to vector database (skips if already loaded)
-    add_documents(chunks)
-    
-    print("Ready. Ask questions about your document.")
+    print("Loading all documents...")
+    load_all_documents()
+    print("Ready. Ask questions about your documents.")
     print("Type 'quit' to exit.")
 
     while True:
