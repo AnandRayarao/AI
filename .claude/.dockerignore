@@ -1,0 +1,8 @@
+venv/
+chroma_db/
+chroma_db_multi/
+__pycache__/
+.git/
+*.pem
+*.ppk
+*.pdf
