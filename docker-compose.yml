@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  askmydoc:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./docs:/app/docs
+      - ./chroma_db_multi:/app/chroma_db_multi
+    env_file:
+      - .env
+    restart: always

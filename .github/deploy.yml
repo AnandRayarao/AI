@@ -1,0 +1,23 @@
+name: Deploy AskMyDoc
+
+on:
+  push:
+    branches:
+      - week2
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd ~/AI
+            git pull origin week2
+            docker-compose down
+            docker-compose up --build -d
